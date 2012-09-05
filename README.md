@@ -23,9 +23,9 @@ Class Details
 
 Example call:
 ---------------------
-'''
+´´´
 class { 'nsis':
 	root_folder => '/usr/local/src',
 	make_public => true
 }
-'''
+´´´
