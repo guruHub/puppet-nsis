@@ -17,15 +17,21 @@ class nsis($root_folder='/usr/local/src',$make_public=true) {
 	        owner => deploy,
         	group => deploy,
 	        mode => '0644',
-	} -> wget::fetch {'nsis-src-download' :
+	} 
+        wget::fetch { 'nsis-src-download' :
 		source => 'http://sourceforge.net/projects/nsis/files/NSIS%202/2.46/nsis-2.46-src.tar.bz2/download',
 		destination => "$root_folder/nsis-2.46-src.tar.bz2",
-	} -> wget::fetch {'nsis-zip-download' :
+		require => File[$root_folder]
+	}
+	wget::fetch {'nsis-zip-download' :
 		source => 'http://sourceforge.net/projects/nsis/files/NSIS%202/2.46/nsis-2.46.zip/download',
 		destination => "$root_folder/nsis-2.46.zip",
-	} -> wget::fetch {'osslsigncode-download' :
+		require => Wget::Fetch["nsis-src-download"],
+	}
+	wget::fetch {'osslsigncode-download' :
 		source => 'http://downloads.sourceforge.net/project/osslsigncode/osslsigncode/osslsigncode-1.4.tar.gz',
 		destination => "$root_folder/osslsigncode-1.4.tar.gz",
+		require => Wget::Fetch["nsis-zip-download"]
 	} 
 
 	# Install osslsigncode
@@ -33,6 +39,7 @@ class nsis($root_folder='/usr/local/src',$make_public=true) {
 		command => 'tar xzf osslsigncode-1.4.tar.gz',
 		path => "$exec_path",
 		onlyif => "test ! -d $root_folder/osslsigncode-1.4",
+		require => Wget::Fetch["osslsigncode-download"],
 		cwd => $root_folder
 	}
         exec { "configure-osslsigncode" :
@@ -91,7 +98,7 @@ class nsis($root_folder='/usr/local/src',$make_public=true) {
         } 
     	file { "$root_folder/nsis-2.46/share/nsis":
 	      ensure => link,
-	      target => "$root_folder/nsis-2.46",
+	      target => "../",	 
 	      require => File["$root_folder/nsis-2.46/share"]
 	}
 
